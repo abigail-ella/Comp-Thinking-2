@@ -1,0 +1,350 @@
+---
+title: "Computational Thinking 2"
+author: "Abbie & Sam"
+format: 
+  pdf: default
+editor: visual
+---
+
+# Activity 8: Computational thinking 2: conditionals
+
+Read in packages
+
+```{r}
+library(tidyverse)
+library(here)
+```
+
+# 1. Conditionals
+
+## 1.1 if else statements
+
+Example of ifelse
+
+```{r}
+x <- 5
+
+# Check if the value of x is greater than 10
+if(x > 10)
+{ 
+  # Paste takes the value stored in x and combines that with a character string
+  print(paste(x, "is greater than 10")) 
+} else
+{ 
+  print(paste(x, "is less than or equal to 10")) 
+}
+```
+
+### Q1.1: Modify the value of x
+
+```{r}
+x <- 11
+
+# Check if the value of x is greater than 10
+if(x > 10)
+{ 
+  print(paste(x, "is greater than 10")) 
+} else
+{ 
+  print(paste(x, "is less than or equal to 10")) 
+}
+```
+
+This shows that x is greater than 10. It executed the first function since that was true.
+
+### Using `traceback()` for errors
+
+```{r}
+x <- 5
+
+# Check if the value of x is greater than 10
+if(x > 10)
+{ 
+  # If x is > 10, multiple x by 2
+  print(x*2)
+} else
+{ 
+  # If x is not > 10, divide x by 2  
+  print(x/2) 
+}
+```
+
+Changing x\<- to x \<- "five"
+
+```{r eval = FALSE}
+x <- "five"
+
+# Check if the value of x is greater than 10
+if(x > 10)
+{ 
+  # If x is > 10, multiple x by 2
+  print(x*2)
+} else
+{ 
+  # If x is not > 10, divide x by 2  
+  print(x/2) 
+}
+```
+
+```{r}
+traceback()
+```
+
+### Adding another condition
+
+Reran for x=9, 10, and 11
+
+```{r}
+# define a variable
+x <- 11
+
+# check the value of x using nested if-else statements
+if (x < 10) {
+  # if x is less than 10
+  print("x is less than 10")
+} else {
+  # if x is exactly equal to 10
+  if (x == 10) {
+    print("x is 10!!!")
+  } else {
+    # if x is greater than 10
+    print("x is greater than 10")
+  }
+}
+```
+
+For loops and ifelse
+
+```{r}
+vec <- c(9, 10, 11, 12)
+```
+
+```{r}
+# For 1 through the length of the vector "vec" 
+for (i in 1:length(vec)) {
+  
+  # check the value of using nested if-else statements
+  if (vec[i] < 10) {
+    # if the element is less than 10
+    print("value is less than 10")
+  } else {
+    # if the element is exactly equal to 10
+    if (vec[i] == 10) {
+      # if the element equals 10
+      print("value is 10!!!")
+    } else {
+      # if the element is greater than 10
+      print("value is greater than 10")
+    }
+  }
+  
+}
+```
+
+### Q1.2: Create a new for loop + if else statement
+
+Create vector
+
+```{r}
+y <- c(-2, 42, 0, 10)
+```
+
+```{r}
+# For 1 through the length of the vector "y"
+for (i in 1:length(y)) {
+  
+  # check the value of using nested if-else statements
+  if (y[i] < 0) {
+    # if the element is less than 0
+    print("value is less than 0")
+  } else {
+    # if the element is exactly equal to 0
+    if (y[i] == 0) {
+      # if the element equals 0
+      print("value is 0!!!")
+    } else {
+      # if the element is greater than 0
+      print("value is greater than 0")
+    }
+  }
+  
+}
+```
+
+## 1.2 `case_when()` and pikas
+
+Load Packages
+
+```{r}
+library(lterdatasampler)
+library(tidyverse)
+```
+
+### Q1.3: How do the researchers measure pika stress?
+
+```{r}
+?lterdatasampler
+?nwt_pikas
+```
+
+concentration_pg_m
+
+:   a number denoting the glucocorticoid metabolite (GCM) concentration in picogram GCM/gram dry pika feces
+
+This column in the data set measures pika stress via feces samples as glucocorticoid metabolite (GCM) in picogram GCM/gram. "Stress was measured by observing the amount of glucocorticoid metabolite present in pika feces."
+
+### Q1.4: What does a row represent in this data?
+
+Each row is an individual sample of pika feces.
+
+```{r}
+head(nwt_pikas)
+```
+
+### Categorize stress
+
+```{r}
+# Make a histogram
+nwt_pikas %>% 
+  ggplot(aes(x = concentration_pg_g)) +
+  # Add the histogram geom, which only needs an x-axis
+  # Choose a binwidth of 500 picogram GCM/gram
+  geom_histogram(binwidth = 500,
+                 fill = "white",
+                 color = "black")
+```
+
+Wide distribution of stress but more on the lower end with a smaller number of individuals on the higher end.
+
+```{r}
+# Make a scatterplot with jittered points
+nwt_pikas %>% 
+  # We're adding a little placeholder axis just so we can see the point distribution
+  ggplot(aes(x ="Placeholder", 
+             y = concentration_pg_g)) +
+  # Add the geom_jitter geom
+  geom_jitter(width = 0.1)
+```
+
+```{r}
+nwt_pikas_categ <- nwt_pikas %>% 
+  # Call the new column stress_category
+  mutate(stress_category = case_when(
+    # When the value is > 5000, make the new column's value "Stressed!!!!"
+    concentration_pg_g > 5000 ~ "Stressed!!!!!!",
+    # Otherwise, make the new column's value "Chill"
+    .default = "Chill"
+  ))
+
+# Check out the first 6 rows, but remove the utm columns just for visibility
+head(nwt_pikas_categ %>% select(-c(utm_easting, utm_northing)))
+```
+
+### Q1.5: Remake the scatterplot, but color the points by the new stress category
+
+```{r}
+# Make a scatterplot with jittered points
+nwt_pikas_categ %>% 
+  # We're adding a little placeholder axis just so we can see the point distribution
+  ggplot(aes(x ="Placeholder", 
+             y = concentration_pg_g,
+             color = stress_category)) +
+  # Add the geom_jitter geom
+  geom_jitter(width = 0.1)
+```
+
+Another category for our pikas– time of year
+
+```{r}
+nwt_pikas_categ2 <- nwt_pikas_categ %>% 
+  # Create a new column called month
+  # then, extract the month from the date using the month() function
+  mutate(month = month(date)) %>% 
+  # Lastly, relocate the month column after the date column so it's more easily visible to us
+  relocate(month, .after = date)
+
+head(nwt_pikas_categ2)
+```
+
+Creating stress categories for summer
+
+```{r}
+nwt_pikas_summerstress <- nwt_pikas_categ2 %>% 
+  mutate(summer_stress_category = case_when(
+    (month == 6 | month == 7) & concentration_pg_g > 5000 ~ "Early summer stress",
+    (month == 6 | month == 7) & concentration_pg_g <= 5000 ~ "Early summer chill",
+    (month == 8 | month == 9) & concentration_pg_g > 5000 ~ "Late summer stress",
+    (month == 8 | month == 9) & concentration_pg_g <= 5000 ~ "Late summer chill",
+    .default = "NA"
+  ))
+
+head(nwt_pikas_summerstress)
+```
+
+```{r}
+# Make a scatterplot with jittered points
+nwt_pikas_summerstress %>% 
+  # We're adding a little placeholder axis just so we can see the point distribution
+  ggplot(aes(x = month, 
+             y = concentration_pg_g,
+             color = summer_stress_category)) +
+  # Add the geom_jitter geom
+  geom_jitter(width = 0.1)
+```
+
+# 2. DIY a for loop and an if else statement / case when
+
+### Q2.1 What dataset are you using?
+
+```{r}
+library(palmerpenguins)
+```
+
+We will be using the penguins dataset.
+
+### Q2.2 Write a couple sentences describing what you want to do with the for loop
+
+```{r}
+head(penguins)
+```
+
+Average for each bill length, bill depth, flipper length and body mass per species.
+
+### Q2.3 Apply the for loop to this dataset
+
+```{r}
+#This loops through the columns 3 through 6
+for (i in 3:6) {
+  #This prints Mean for column and the column name for whatever "i" column you are looping through
+  print(paste("Mean for column", colnames(penguins)[i]))
+  #This calculates and prints the average for that column ignoring NAs
+  print(mean(penguins[[i]], na.rm = TRUE))
+}
+```
+
+### Q2.4 Write a couple sentences describing what you want to do with the if else/case_when 
+
+```{r}
+view(penguins)
+```
+
+We are interested in penguin distribution around the varying island. We will perform an ifelse to gather the number of individuals present from per island and categorize for level of threat.
+
+```{r}
+#Creating object called island_counts
+island_counts <- penguins %>%
+  #grouping by island and year
+  group_by(island, year) %>% 
+  #number of observations will equal penguin count
+  summarise(penguin_count = n())
+
+#create island status object
+island_status <- island_counts %>%
+  #mutate via if else to create a new column called status
+  mutate(status = ifelse(penguin_count < 50, "Threatened", "Stable"))
+
+print(island_status)
+
+```
+
+We estimated 50 as a stable population, however, we don't know this metric and this could vary depending on the resources and carrying capacity of the specific island. But this gives a good baseline to work off of. Here we see how stability and population size have changed over time.
